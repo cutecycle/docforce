@@ -9,7 +9,7 @@ function Get-ChangedFiles {
 	param ( 
 		$file
 	) 
-	$changedFiles = git diff origin/HEAD --name-only | ForEach-Object { 
+	$changedFiles = git diff --name-only | ForEach-Object { 
 		Get-ChildItem $_
 	}	
 	
@@ -17,16 +17,23 @@ function Get-ChangedFiles {
 
 }
 
-Test-StaleDocument { 
+function Test-StaleDocument { 
 	param ( 
 		$file 
 	)
-
-	$directory = $file.metadata.relevantDirectory 
-	$stale = (git diff origin/HEAD --name-only ) -contains $file
-	
-	
-	return $inDiff
+	try { 
+		$directory = $file.metadata.relevantDirectory 
+		$files = (git diff  --name-only ) | foreach-object { 
+		(Get-childitem $_).Directory
+		}
+		$stale = ($files | Where-Object { 
+		(Get-ChildItem $file.path).Directory.Name -eq $_.Name
+			}).length -gt 0
+	}
+	catch {
+		$stale = $true
+	}
+	return $stale
 
 }
 function Get-MarkdownFiles { 
@@ -44,10 +51,18 @@ function Get-MarkdownFiles {
 }
 function Get-StaleDocuments {
 	$files = Get-MarkdownFiles
-	$files | ForEach-Object -Parallel {
-		Test-StaleDocument $_
+	$stales = $files | ForEach-Object {
+		
+		if (Test-StaleDocument $_) {
+			$_
+		}
+		
 	}
-	
+	if ($stales.length -gt 0) {
+		$stales
+		throw("Stale documents found")
+
+	}
 }
 
 Export-ModuleMember -function Get-StaleDocuments

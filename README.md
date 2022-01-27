@@ -1,3 +1,3 @@
 ---
-relevantDirectory: README.md
+relevantDirectory: .
 ---
