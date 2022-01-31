@@ -47,6 +47,12 @@ function Get-MarkdownFiles {
 			metadata = Get-MarkdownMetadata -Path $_.FullName;
 		}
 	}
+	$unmanagedFiles = $list | Where-Object { 
+		$null -eq $_.metadata.relevantDirectory 
+	}
+	if($unmanagedFiles.length -gt 0) { 
+		throw "The following files do not have the relevantDirectory Metadata: $($unmanagedFiles | ForEach-Object { $_.path })";
+	}
 	$list 
 }
 function Get-StaleDocuments {
