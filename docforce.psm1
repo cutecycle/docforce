@@ -71,38 +71,38 @@ function Get-StaleDocuments {
 	}
 }
 
-function Get-StaleDocuments-WithoutGit { 
-	$markdowns = Get-ChildItem -Recurse -Filter "*.md"
-	$withMetadata = $markdowns | ForEach-Object -Parallel { 
-		@{ 
-			"path"   = $_.FullName; 
-			"name"   = $_.Name; 
-			"title"  = $_.Name.Replace(".md", ""); 
-			metadata = Get-MarkdownMetadata -Path $_.FullName;
-		}
-	}
-	# if the date of the markdown file is older than the date of the relevant directory, then it is stale
-	$stales = $withMetadata | Where-Object { 
-		(Get-Item $relevantDirectory).LastWriteTime -gt $_.metadata.lastModified
-	}
+# function Get-StaleDocuments-WithoutGit { 
+# 	$markdowns = Get-ChildItem -Recurse -Filter "*.md"
+# 	$withMetadata = $markdowns | ForEach-Object -Parallel { 
+# 		@{ 
+# 			"path"   = $_.FullName; 
+# 			"name"   = $_.Name; 
+# 			"title"  = $_.Name.Replace(".md", ""); 
+# 			metadata = Get-MarkdownMetadata -Path $_.FullName;
+# 		}
+# 	}
+# 	# if the date of the markdown file is older than the date of the relevant directory, then it is stale
+# 	$stales = $withMetadata | Where-Object { 
+# 		(Get-Item $relevantDirectory).LastWriteTime -gt $_.metadata.lastModified
+# 	}
 
-}
-function Get-StaleDocuments-AcrossBranch { 
-	$markdowns = Get-ChildItem -Recurse -Filter "*.md"
-	$withMetadata = $markdowns | ForEach-Object -Parallel { 
-		@{ 
-			"path"   = $_.FullName; 
-			"name"   = $_.Name; 
-			"title"  = $_.Name.Replace(".md", ""); 
-			metadata = Get-MarkdownMetadata -Path $_.FullName;
-		}
-	}
-	# if the date of the markdown file is older than the date of the relevant directory, then it is stale
-	$stales = $withMetadata | Where-Object { 
-		(Get-Item $relevantDirectory).LastWriteTime -gt $_.metadata.lastModified
-	}
+# }
+# function Get-StaleDocuments-AcrossBranch { 
+# 	$markdowns = Get-ChildItem -Recurse -Filter "*.md"
+# 	$withMetadata = $markdowns | ForEach-Object -Parallel { 
+# 		@{ 
+# 			"path"   = $_.FullName; 
+# 			"name"   = $_.Name; 
+# 			"title"  = $_.Name.Replace(".md", ""); 
+# 			metadata = Get-MarkdownMetadata -Path $_.FullName;
+# 		}
+# 	}
+# 	# if the date of the markdown file is older than the date of the relevant directory, then it is stale
+# 	$stales = $withMetadata | Where-Object { 
+# 		(Get-Item $relevantDirectory).LastWriteTime -gt $_.metadata.lastModified
+# 	}
 
-}
+# }
 function Get-StaleDocuments-SuperSimple { 
 	$markdowns = Get-ChildItem -Recurse -Filter "*.md"	
 	#if last modified date is more than two weeks old, then it might be stale
@@ -110,6 +110,9 @@ function Get-StaleDocuments-SuperSimple {
 		(Get-Item $_).LastWriteTime -lt (Get-Date).AddDays(-14)
 	}
 	$stales
+	throw { 
+		"Stale documents found"
+	}
 }
 Export-ModuleMember -function Get-StaleDocuments
 Export-ModuleMember -function Get-StaleDocuments-SuperSimple
